@@ -18,15 +18,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-
 
 
 /**
@@ -42,7 +39,8 @@ public class QuizActivityFragment extends Fragment {
 
     private ArrayList<Superhero> quizButtonList;
     private List<Superhero> quizSuperheroesList;
-    private Set<String> quizTypeSet;
+
+    private int quizType;
     private String correctAnswer;
     private int totalGuesses;
     private int correctAnswers;
@@ -54,6 +52,7 @@ public class QuizActivityFragment extends Fragment {
     private ImageView superheroImageView;
     private LinearLayout[] guessLinearLayouts;
     private TextView answerTextView;
+    private TextView guessCategoryTextView;
 
 
 
@@ -64,13 +63,19 @@ public class QuizActivityFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_quiz, container, false);
 
-        quizButtonList = QuizActivity.allSuperHeroes;
+
         quizSuperheroesList = new ArrayList<>();
+        quizButtonList = new ArrayList<>();
+
+        try {
+            quizButtonList = JSONLoader.loadJSONFromAsset(getActivity());
+        }
+        catch (IOException e) {
+            Log.e("OC Music Events", "Error loading JSON data. " + e.getMessage());
+        }
 
         random = new SecureRandom();
         handler = new Handler();
-
-
 
         questionNumberTextView = (TextView) view.findViewById(R.id.questionNumberTextView);
         superheroImageView = (ImageView) view.findViewById(R.id.superHeroImageView);
@@ -80,6 +85,7 @@ public class QuizActivityFragment extends Fragment {
         guessLinearLayouts[2] = (LinearLayout) view.findViewById(R.id.row3LinearLayout);
         guessLinearLayouts[3] = (LinearLayout) view.findViewById(R.id.row4LinearLayout);
         answerTextView = (TextView) view.findViewById(R.id.answerTextView);
+        guessCategoryTextView = (TextView) view.findViewById(R.id.guessCategoryTextView);
 
         // Configure listeners for the guess buttons
         for (LinearLayout row : guessLinearLayouts) {
@@ -90,7 +96,6 @@ public class QuizActivityFragment extends Fragment {
                 button.setOnClickListener(guessButtonListener);
             }
         }
-
         questionNumberTextView.setText(getString(R.string.question, 1, SUPERHEROES_IN_QUIZ));
         return view;
     }
@@ -110,11 +115,19 @@ public class QuizActivityFragment extends Fragment {
     }
 
     public void updateQuizType(SharedPreferences sharedPreferences) {
-        quizTypeSet = sharedPreferences.getStringSet(QuizActivity.QUIZ_TYPE, null);
+
+        /*
+        value of quizType:
+         0: Superhero name, 1: Superpower, 2: One thing
+         -1: preference value does not exist and method returned default value in parameter
+         */
+        quizType = Integer.parseInt(sharedPreferences.getString(QuizActivity.QUIZ_TYPE, "0"));
+        guessCategoryTextView.setText(quizType == 2 ? getString(R.string.guess_one_thing) :
+                quizType == 1 ? getString(R.string.guess_superpower) :
+                        getString(R.string.guess_superhero));
     }
 
     public void resetQuiz() {
-        quizButtonList.clear();
 
         // Reset correctAnswers, totalGuesses, and clear quizSuperheroesList
         correctAnswers = 0;
@@ -126,10 +139,10 @@ public class QuizActivityFragment extends Fragment {
         while (superheroCounter <= SUPERHEROES_IN_QUIZ) {
             int randomIndex = random.nextInt(TOTAL_SUPERHEROES);
 
-            // Get random file name
-            Superhero singleHero = QuizActivity.allSuperHeroes.get(randomIndex);
+            // Get random Superhero
+            Superhero singleHero = quizButtonList.get(randomIndex);
 
-            // If the quiz type is enabled and hasn't already been chosen
+            // If the Superhero hasn't already been chosen
             if (!quizSuperheroesList.contains(singleHero)) {
                 quizSuperheroesList.add(singleHero);
                 ++superheroCounter;
@@ -142,7 +155,8 @@ public class QuizActivityFragment extends Fragment {
     private void loadNextSuperhero() {
         // Get file name of next superhero and remove it from the list
         Superhero nextSuperHero = quizSuperheroesList.remove(0);
-        correctAnswer = nextSuperHero.getName();
+        correctAnswer = quizType == 0 ? nextSuperHero.getName() : quizType == 1 ?
+                nextSuperHero.getSuperpower() : nextSuperHero.getOneThing();
         answerTextView.setText("");
 
         // Display the current question number
@@ -164,10 +178,10 @@ public class QuizActivityFragment extends Fragment {
             Log.e(TAG, "Error loading " + nextSuperHero.getImageName(), e);
         }
 
-        // Shuffle file names
+        // Shuffle Superheros
         Collections.shuffle(quizButtonList);
 
-        // Put the correct answers at the end of the file name list
+        // Put the correct answers at the end of the Superhero list
         int correct = quizButtonList.indexOf(nextSuperHero);
         quizButtonList.add(quizButtonList.remove(correct));
 
@@ -180,10 +194,7 @@ public class QuizActivityFragment extends Fragment {
                 // Get reference to button to configure
                 Button newGuessButton = (Button) guessLinearLayouts[row].getChildAt(column);
                 newGuessButton.setEnabled(true);
-
-                // Get country name and set it as newGuessButton's text
-                String buttonText = quizButtonList.get((row * 2) + column).getName();
-                newGuessButton.setText(buttonText);
+                newGuessButton.setText(getButtonText(row, column));
             }
         }
         // Randomly replace one button with the correct answer
@@ -276,7 +287,22 @@ public class QuizActivityFragment extends Fragment {
         }
     }
 
+    private String getButtonText(int row, int column) {
+        String buttonText = "";
+        switch (quizType) {
+            case 0:
+                buttonText = quizButtonList.get((row * 2) + column).getName();
+                break;
 
+            case 1:
+                buttonText = quizButtonList.get((row * 2) + column).getSuperpower();
+                break;
 
+            case 2:
+                buttonText = quizButtonList.get((row * 2) + column).getOneThing();
+                break;
+        }
+        return buttonText;
+    }
 }
 

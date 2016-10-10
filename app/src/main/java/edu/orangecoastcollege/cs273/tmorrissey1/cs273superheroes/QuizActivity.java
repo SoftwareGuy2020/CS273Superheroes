@@ -1,6 +1,5 @@
 package edu.orangecoastcollege.cs273.tmorrissey1.cs273superheroes;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -9,14 +8,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Set;
 
 
 public class QuizActivity extends AppCompatActivity {
@@ -24,10 +18,8 @@ public class QuizActivity extends AppCompatActivity {
     public static final String CHOICES = "pref_numberOfChoices";
     public static final String QUIZ_TYPE = "pref_quizType";
 
-    public static ArrayList<Superhero> allSuperHeroes;
     private boolean phoneDevice = true;
     private boolean preferencesChanged = true;
-    private Context context = this;
 
     /**
      * Perform initialization of all fragments and loaders.
@@ -44,12 +36,6 @@ public class QuizActivity extends AppCompatActivity {
         PreferenceManager.getDefaultSharedPreferences(this).
                 registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
-        try {
-            allSuperHeroes = JSONLoader.loadJSONFromAsset(context);
-        }
-        catch (IOException e) {
-            Log.e("OC Music Events", "Error loading JSON data. " + e.getMessage());
-        }
 
         // determine screen size
         int screenSize = getResources().getConfiguration().screenLayout &
@@ -118,24 +104,11 @@ public class QuizActivity extends AppCompatActivity {
                     }
 
                     else if (key.equals(QUIZ_TYPE)) {
-                        Set<String> quizType = sharedPreferences.getStringSet(QUIZ_TYPE, null);
+                        int quizType = Integer.parseInt(sharedPreferences.getString(
+                                QuizActivity.QUIZ_TYPE, "0"));
 
-                        if (quizType != null && quizType.size() > 0 ) {
-                            quizFragment.updateQuizType(sharedPreferences);
-                            quizFragment.resetQuiz();
-                        }
-                        else {
-                            // must select one quiz type -- set superhero name as default
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                            quizType.add(getString(R.string.default_quiz_type));
-                            editor.putStringSet(QUIZ_TYPE, quizType);
-                            editor.apply();
-
-                            Toast.makeText(QuizActivity.this, R.string.default_quiz_type_message,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
+                        quizFragment.updateQuizType(sharedPreferences);
+                        quizFragment.resetQuiz();
                     }
                     Toast.makeText(QuizActivity.this, R.string.restarting_quiz,
                             Toast.LENGTH_SHORT).show();

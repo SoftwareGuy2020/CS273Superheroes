@@ -6,9 +6,9 @@
         <item>One Thing</item>
     </string-array>
     <string-array name="quiz_type">
-        <item>Superhero_Name</item>
-        <item>Superpower</item>
-        <item>One_Thing</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
     <string-array name="number_of_choices">
         <item>2</item>

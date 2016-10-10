@@ -2,14 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="0"
         android:entries="@array/quiz_type_for_settings"
         android:entryValues="@array/quiz_type"
         android:key="pref_quizType"
         android:title="@string/quiz_type"
         android:summary="@string/quiz_type_description"/>
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="4"
         android:title="@string/number_of_choices"
         android:entries="@array/number_of_choices"
         android:entryValues="@array/number_of_choices"
