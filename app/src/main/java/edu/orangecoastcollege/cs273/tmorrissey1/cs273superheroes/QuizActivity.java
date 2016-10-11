@@ -12,7 +12,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-
+/**
+ * Controller. Determines which fragments to display.
+ * @author Travis Morrissey
+ */
 public class QuizActivity extends AppCompatActivity {
 
     public static final String CHOICES = "pref_numberOfChoices";
@@ -51,6 +54,9 @@ public class QuizActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Dispatch onStart() to all fragments. Ensure any created loaders are now started.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -67,6 +73,11 @@ public class QuizActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialize the contents of the Activity's standard options menu.
+     * @param menu The options menu in which you place your items.
+     * @return You must return true for the menu to be displayed; if you return false it will not be shown.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         int orientation = getResources().getConfiguration().orientation;
@@ -81,6 +92,11 @@ public class QuizActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Called whenever an options item is selected. passes intent to SettingsActivity
+     * @param item item that was selected
+     * @return Return false to allow normal menu processing to proceed, true to consume it here
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent preferencesIntent = new Intent(this, SettingsActivity.class);
@@ -91,6 +107,11 @@ public class QuizActivity extends AppCompatActivity {
 
     private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener =
             new SharedPreferences.OnSharedPreferenceChangeListener() {
+                /**
+                 * Called when a shared preference is changed, added, or removed
+                 * @param sharedPreferences the shared preference that was changed
+                 * @param key the key of the preference that was changed, added, or removed.
+                 */
                 @Override
                 public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                     preferencesChanged = true;
@@ -104,9 +125,6 @@ public class QuizActivity extends AppCompatActivity {
                     }
 
                     else if (key.equals(QUIZ_TYPE)) {
-                        int quizType = Integer.parseInt(sharedPreferences.getString(
-                                QuizActivity.QUIZ_TYPE, "0"));
-
                         quizFragment.updateQuizType(sharedPreferences);
                         quizFragment.resetQuiz();
                     }

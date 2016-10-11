@@ -27,7 +27,9 @@ import java.util.List;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment of QuizActivity. Controls inputs/outputs to/from fragment_quiz.xml.
+ * Handles all game logic.
+ * @author Travis Morrissey
  */
 public class QuizActivityFragment extends Fragment {
 
@@ -55,14 +57,20 @@ public class QuizActivityFragment extends Fragment {
     private TextView guessCategoryTextView;
 
 
-
+    /**
+     * Instantiates the view. Gets Superhero data from JSONLoader.
+     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     *                  The fragment should not add the view itself, but this can be used to generate the LayoutParams of the view
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state as given here
+     * @return Return the View for the fragment's UI, or null
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_quiz, container, false);
-
 
         quizSuperheroesList = new ArrayList<>();
         quizButtonList = new ArrayList<>();
@@ -100,6 +108,11 @@ public class QuizActivityFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Gets the new selection of how many rows to display and updates the view to show the correct
+     * number of guess rows.
+     * @param sharedPreferences the changed shared preferences
+     */
     public void updateGuessRows(SharedPreferences sharedPreferences) {
         // Get number of guess rows that should be displayed
         String choices = sharedPreferences.getString(QuizActivity.CHOICES, null);
@@ -114,12 +127,15 @@ public class QuizActivityFragment extends Fragment {
             guessLinearLayouts[row].setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Gets new quiz type selected from sharedPreferences and updates the quiz
+     * @param sharedPreferences the changed shared preferences
+     */
     public void updateQuizType(SharedPreferences sharedPreferences) {
 
         /*
         value of quizType:
          0: Superhero name, 1: Superpower, 2: One thing
-         -1: preference value does not exist and method returned default value in parameter
          */
         quizType = Integer.parseInt(sharedPreferences.getString(QuizActivity.QUIZ_TYPE, "0"));
         guessCategoryTextView.setText(quizType == 2 ? getString(R.string.guess_one_thing) :
@@ -127,6 +143,9 @@ public class QuizActivityFragment extends Fragment {
                         getString(R.string.guess_superhero));
     }
 
+    /**
+     * Resets the quiz. correctAnswers and totalGuesses set to zero, and quizSuperhoeslist is cleared.
+     */
     public void resetQuiz() {
 
         // Reset correctAnswers, totalGuesses, and clear quizSuperheroesList
